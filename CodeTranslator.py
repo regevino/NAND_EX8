@@ -137,11 +137,11 @@ class CodeTranslator:
     def __declare_function(self, cmds):
         file = self.__filename
         func = cmds[0]
-
+        self.__cur_func = func
         num_locals = int(cmds[1])
         lines = ['({}{})'.format(file, func)]
         for i in range(num_locals):
-            lines += ['@' + str(i), 'D=M', '@LCL', 'D=D+M', 'A=D', 'M=0']
+            lines += ['@SP', 'M=M+1', 'A=M-1', 'M=0']
         return lines
 
     def __call_function(self, cmds):
@@ -159,20 +159,21 @@ class CodeTranslator:
                 '@ARG', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@THIS', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@THAT', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
-                '@SP', 'D=M', '@5', 'D=D-A', '@' + num_args, 'D=D-A', '@ARG', 'M=D', '@SP', 'D=M', '@LCL', 'M=D',
+                '@SP', 'D=M', '@5', 'D=D-A', '@' + num_args, 'D=D-A', '@ARG', 'M=D',
+                '@SP', 'D=M', '@LCL', 'M=D',
                 '@{}{}'.format(file, func), '0;JMP',
                 '({}{}$ret.{})'.format(file, func, index)]
 
     def __return(self):
-        return ['@LCL', 'D=M', '@R5', 'M=D',
-                '@5', 'D=D-A', 'A=D', 'D=M', '@R6', 'M=D',
+        return ['@LCL', 'D=M', '@R13', 'M=D',
+                '@5', 'D=D-A', 'A=D', 'D=M', '@R14', 'M=D',
                 '@SP', 'M=M-1', 'A=M', 'D=M', '@ARG', 'A=M', 'M=D',
                 '@ARG', 'D=M+1', '@SP', 'M=D',
-                '@R5', 'D=M', '@1', 'D=D-A', 'A=D', 'D=M', '@THAT', 'M=D',
-                '@R5', 'D=M', '@2', 'D=D-A', 'A=D', 'D=M', '@THIS', 'M=D',
-                '@R5', 'D=M', '@3', 'D=D-A', 'A=D', 'D=M', '@ARG', 'M=D',
-                '@R5', 'D=M', '@4', 'D=D-A', 'A=D', 'D=M', '@LCL', 'M=D',
-                '@R6', 'A=M', '0;JMP']
+                '@R13', 'D=M', '@1', 'D=D-A', 'A=D', 'D=M', '@THAT', 'M=D',
+                '@R13', 'D=M', '@2', 'D=D-A', 'A=D', 'D=M', '@THIS', 'M=D',
+                '@R13', 'D=M', '@3', 'D=D-A', 'A=D', 'D=M', '@ARG', 'M=D',
+                '@R13', 'D=M', '@4', 'D=D-A', 'A=D', 'D=M', '@LCL', 'M=D',
+                '@R14', 'A=M', '0;JMP']
 
     def __sys_init(self):
         lines = ['@256', 'D=A', '@SP', 'M=D']
