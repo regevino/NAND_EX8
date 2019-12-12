@@ -1,0 +1,29 @@
+avih,regevino
+
+===============================================================================
+Avinoam Hershler, ID 208926964, avinoam.hershler@mail.huji.ac.il
+Dan Regev, ID 208272518, dan.regev@mail.huji.ac.il
+===============================================================================
+
+                           Project 7 - a Python VMTranslator
+                           -------------------------- 
+  
+
+Submitted Files
+---------------
+README - This file.
+
+VMCode.py - A python class representing vm code.
+VMTranslator.py - A python script that receives .vm files and compiles them into hack assembly.
+CodeTranslator.py - A python class that translates a VMCode object into HACK assembly.
+AssemblyWriter.py - A python class that writes HACK assembly into a .asm file.
+Parser.py - A python class that parses a .vm file into a VMCode object.
+
+VMtranslator - Shell script to wrap our VMTranslator.py script.
+Makefile - Make script to ensure users have execute permissions for VMtranslator.
+
+
+
+Remarks
+-------
+
