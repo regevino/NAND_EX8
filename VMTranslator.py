@@ -20,12 +20,14 @@ if __name__ == '__main__':
         out_file = os.path.join(path_to_dir, os.path.basename(path_to_dir) + '.asm')
 
     asm_file_translations = []
+    func_counter = {}
     for file in filter(lambda x: x[-3:] == '.vm', files_list):
         file = os.path.join(path_to_dir, file)
         file_parser = Parser(file)
         parsed_code = file_parser.parse()
-        code_translator = CodeTranslator(parsed_code)
+        code_translator = CodeTranslator(parsed_code, func_counter)
         assembly_code = code_translator.translate()
+        func_counter = code_translator.get_counter()
         asm_file_translations.append(assembly_code)
 
     asm_writer = AssemblyWriter(asm_file_translations, out_file)

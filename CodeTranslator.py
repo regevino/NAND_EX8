@@ -24,7 +24,7 @@ class CodeTranslator:
     Represents an object that can translate VMCode objects into hack assembly code.
     """
 
-    def __init__(self, parsed_VM_code):
+    def __init__(self, parsed_VM_code, func_counter):
         """
         Create a translator object that can translate a specific VMCode object into HACK assembly code.
         :param parsed_VM_code: An VMCode object.
@@ -32,7 +32,7 @@ class CodeTranslator:
         self.__VM_code = parsed_VM_code
         self.__filename = self.__VM_code.get_filename()
         self.__cur_func = ''
-        self.__func_counter = {}
+        self.__func_counter = func_counter
         self.SEGMENTS = {'argument': lambda x: ['@ARG', 'D=M', '@' + str(x), 'D=D+A', '@R13', 'M=D'],
                          'local': lambda x: ['@LCL', 'D=M', '@' + str(x), 'D=D+A', '@R13', 'M=D'],
                          'static': lambda x: ['@' + str(self.__filename) + str(x), 'D=A', '@R13', 'M=D'],
@@ -139,7 +139,7 @@ class CodeTranslator:
         func = cmds[0]
         self.__cur_func = func
         num_locals = int(cmds[1])
-        lines = ['({}{})'.format(file, func)]
+        lines = ['({})'.format(func)]
         for i in range(num_locals):
             lines += ['@SP', 'M=M+1', 'A=M-1', 'M=0']
         return lines
@@ -154,15 +154,15 @@ class CodeTranslator:
             self.__func_counter[func] = 1
         index = self.__func_counter[func]
 
-        return ['@{}{}$ret.{}'.format(file, func, index), 'D=A', '@SP', 'M=M+1', 'A=M-1', 'M=D',
+        return ['@{}$ret.{}'.format(func, index), 'D=A', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@LCL', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@ARG', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@THIS', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@THAT', 'D=M', '@SP', 'M=M+1', 'A=M-1', 'M=D',
                 '@SP', 'D=M', '@5', 'D=D-A', '@' + num_args, 'D=D-A', '@ARG', 'M=D',
                 '@SP', 'D=M', '@LCL', 'M=D',
-                '@{}{}'.format(file, func), '0;JMP',
-                '({}{}$ret.{})'.format(file, func, index)]
+                '@{}'.format(func), '0;JMP',
+                '({}$ret.{})'.format(func, index)]
 
     def __return(self):
         return ['@LCL', 'D=M', '@R13', 'M=D',
@@ -177,4 +177,7 @@ class CodeTranslator:
 
     def __sys_init(self):
         lines = ['@256', 'D=A', '@SP', 'M=D']
-        return lines + self.__call_function('Sys.init 0')
+        return lines + self.__call_function(['Sys.init', '0'])
+
+    def get_counter(self):
+        return self.__func_counter
